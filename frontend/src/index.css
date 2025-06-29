@@ -1,0 +1,121 @@
+.savvycal-calendar-container {
+  background-color: #121416;
+  padding: 2rem;
+  border-radius: 12px;
+  height: 100vh;
+  color: #f0f0f0;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.savvycal-calendar {
+  background-color: #1e1f22;
+  color: #e0e0e0;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+}
+
+.rbc-toolbar {
+  color: #fff;
+  background-color: #2c2f33;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 20px;
+  font-weight: bold;
+}
+
+.rbc-toolbar .rbc-btn-group button {
+  background-color: #4a4d52;
+  border: 1px solid #666;
+  color: #ffffff;
+  margin-right: 5px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background-color 0.3s ease, border 0.3s ease;
+}
+
+.rbc-btn-group button {
+  background-color: #3b3f45;
+  border: none;
+  color: #fff;
+  margin-right: 5px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: background-color 0.3s ease;
+}
+
+.rbc-btn-group button:hover {
+  background-color: #5c5f66;
+}
+
+.rbc-time-view {
+  border-color: #444;
+}
+
+.rbc-slot-selection {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+.rbc-today {
+  background-color: rgba(8, 72, 112, 0.675) !important;
+  border: 1px solid gold;
+}
+
+.rbc-event {
+  background-color: #4caf50; /* IPO block */
+  border: none;
+  color: white;
+  padding: 4px 6px;
+  font-size: 0.85rem;
+  border-radius: 6px;
+}
+
+.rbc-event:hover {
+  background-color: #66bb6a;
+}
+
+.rbc-timeslot-group:hover {
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.rbc-toolbar-label {
+  color: #ffffff;
+  font-size: 1.6rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.rbc-btn-group button {
+  background-color: #4a4d52;
+  border: 1px solid #666;
+  color: #ffffff;
+  margin-right: 5px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  transition: background-color 0.3s ease, border 0.3s ease;
+}
+
+.rbc-btn-group button:hover {
+  background-color: #6c7075;
+  border: 1px solid #888;
+}
+
+.rbc-calendar, .rbc-time-header-content, .rbc-time-content, .rbc-timeslot-group {
+  color: #eaeaea;
+}
+
+.rbc-today {
+  background-color: rgba(255, 215, 0, 0.12);
+}
+
+.rbc-event {
+  background-color: #2196f3;
+  font-weight: bold;
+}
+
+.rbc-event:hover {
+  background-color: #42a5f5;
+}
