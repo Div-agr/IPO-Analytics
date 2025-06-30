@@ -18,7 +18,7 @@ const CalendarComponent = () => {
   const [emailError, setEmailError] = useState('');
 
   const colors = ['#FF8A65', '#4DB6AC', '#BA68C8', '#7986CB', '#FFD54F', '#81C784', '#F06292'];
-  const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+  const BASE_URL = process.env.REACT_APP_BACKEND_URL;
   console.log(BASE_URL);
 
   const fetchAllIPOsForMonth = async () => {
