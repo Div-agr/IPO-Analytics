@@ -18,6 +18,8 @@ const CalendarComponent = () => {
   const [emailError, setEmailError] = useState('');
 
   const colors = ['#FF8A65', '#4DB6AC', '#BA68C8', '#7986CB', '#FFD54F', '#81C784', '#F06292'];
+  const BASE_URL = process.env.REACT_APP_BACKEND_URL || 'http://localhost:5000';
+  console.log(BASE_URL);
 
   const fetchAllIPOsForMonth = async () => {
     const startOfMonth = '2021-01-01';
@@ -26,7 +28,7 @@ const CalendarComponent = () => {
 
     try {
       const response = await axios.get(
-        `http://127.0.0.1:5000/api/ipo_data_range?start=${startOfMonth}&end=${endOfMonth}`
+        `${BASE_URL}/api/ipo_data_range?start=${startOfMonth}&end=${endOfMonth}`
       );
       const ipoList = response.data.ipos || [];
 
@@ -96,7 +98,7 @@ const CalendarComponent = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/subscribe', { email });
+      const response = await axios.post(`${BASE_URL}/api/subscribe`, { email });
       alert('Subscribed successfully!');
       setEmail('');
     } catch (error) {
