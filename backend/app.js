@@ -6,7 +6,16 @@ const scheduleNotifications = require('./jobs/notificationJob');
 
 const app = express();
 
-app.use(cors());
+const allowedOrigins = ['https://ipo-analytics.onrender.com'];
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('CORS not allowed for this origin'));
+    }
+  }
+}));
 app.use(express.json());
 
 app.use('/api', ipoRoutes);
