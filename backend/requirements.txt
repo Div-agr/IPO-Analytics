@@ -1,0 +1,12 @@
+flask
+flask-cors
+flask-mail
+pandas
+requests
+beautifulsoup4
+lxml
+python-dotenv
+scikit-learn
+psycopg2-binary
+upstash-redis
+gunicorn
