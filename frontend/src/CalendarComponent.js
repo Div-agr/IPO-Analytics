@@ -28,7 +28,7 @@ const CalendarComponent = () => {
 
     try {
       const response = await axios.get(
-        `http://127.0.0.1:5000/api/ipo_data_range?start=${startOfMonth}&end=${endOfMonth}`
+        `https://ipo-analytics-backend.onrender.com/api/ipo_data_range?start=${startOfMonth}&end=${endOfMonth}`
       );
       const ipoList = response.data.ipos || [];
 
@@ -66,7 +66,7 @@ const CalendarComponent = () => {
     setSubscribeStatus({ message: '', type: '' });
 
     try {
-      const response = await axios.post('http://127.0.0.1:5000/api/subscribers', {
+      const response = await axios.post('https://ipo-analytics-backend.onrender.com/api/subscribers', {
         email: cleanedEmail,
       });
       setSubscribeStatus({
