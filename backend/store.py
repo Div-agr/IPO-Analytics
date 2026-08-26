@@ -13,7 +13,6 @@ Requires a DATABASE_URL env var pointing at your Neon connection string.
 import os
 import json
 import logging
-import threading
 from contextlib import contextmanager
 from datetime import datetime
 from typing import Dict, Any, List
@@ -41,8 +40,13 @@ if "sslmode" not in DATABASE_URL:
 # A small connection pool — cheap to keep a handful of connections open,
 # and avoids paying a new-TLS-handshake cost on every request the way a
 # single connect()/close() per call would.
+#
+# ThreadedConnectionPool is already thread-safe for concurrent
+# getconn()/putconn() calls (that's the whole reason to use it over
+# SimpleConnectionPool) — so no extra external lock is needed here.
+# Adding one would force every DB call in the app to run one-at-a-time,
+# regardless of maxconn.
 _pool = ThreadedConnectionPool(minconn=1, maxconn=5, dsn=DATABASE_URL)
-_lock = threading.Lock()
 
 
 @contextmanager
@@ -50,12 +54,19 @@ def _connect():
     conn = _pool.getconn()
     try:
         yield conn
+    except Exception:
+        # Without this, a connection that errors mid-query gets returned
+        # to the pool still sitting in an aborted-transaction state —
+        # the *next* request to borrow it fails too, even though its
+        # own query was fine.
+        conn.rollback()
+        raise
     finally:
         _pool.putconn(conn)
 
 
 def _init_db() -> None:
-    with _lock, _connect() as conn:
+    with _connect() as conn:
         with conn.cursor() as cur:
             cur.execute("""
                 CREATE TABLE IF NOT EXISTS notified_ipos (
@@ -87,7 +98,7 @@ def _init_db() -> None:
 
 def is_notified(ipo_name: str, apply_date: str) -> bool:
     """Return True if we've already sent a notification for this IPO+date."""
-    with _lock, _connect() as conn:
+    with _connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "SELECT 1 FROM notified_ipos WHERE ipo_name = %s AND apply_date = %s",
@@ -98,7 +109,7 @@ def is_notified(ipo_name: str, apply_date: str) -> bool:
 
 def mark_notified(ipo_name: str, apply_date: str) -> None:
     """Record that a notification was sent for this IPO+date."""
-    with _lock, _connect() as conn:
+    with _connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "INSERT INTO notified_ipos (ipo_name, apply_date, notified_at) "
@@ -117,7 +128,7 @@ def add_manual_ipo(ipo: Dict[str, Any]) -> None:
     apply_date = ipo.get("Apply Date", "")
     if not ipo_name or not apply_date:
         raise ValueError("Manual IPO entry requires both 'IPO' and 'Apply Date'")
-    with _lock, _connect() as conn:
+    with _connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "INSERT INTO manual_ipos (ipo_name, apply_date, data) "
@@ -130,7 +141,7 @@ def add_manual_ipo(ipo: Dict[str, Any]) -> None:
 
 def get_manual_ipos() -> List[Dict[str, Any]]:
     """Return all manually-added IPO overrides."""
-    with _lock, _connect() as conn:
+    with _connect() as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT data FROM manual_ipos")
             # psycopg2 decodes JSONB columns straight into dict/list.
@@ -139,7 +150,7 @@ def get_manual_ipos() -> List[Dict[str, Any]]:
 
 def remove_manual_ipo(ipo_name: str, apply_date: str) -> bool:
     """Delete a manual override. Returns True if a row was removed."""
-    with _lock, _connect() as conn:
+    with _connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "DELETE FROM manual_ipos WHERE ipo_name = %s AND apply_date = %s",
@@ -157,7 +168,7 @@ def add_subscriber(email: str) -> None:
     email = email.strip().lower()
     if not email or "@" not in email:
         raise ValueError("A valid email address is required")
-    with _lock, _connect() as conn:
+    with _connect() as conn:
         with conn.cursor() as cur:
             cur.execute(
                 "INSERT INTO subscribers (email, subscribed_at) VALUES (%s, %s) "
@@ -170,7 +181,7 @@ def add_subscriber(email: str) -> None:
 def remove_subscriber(email: str) -> bool:
     """Remove an email from the subscriber list. Returns True if it existed."""
     email = email.strip().lower()
-    with _lock, _connect() as conn:
+    with _connect() as conn:
         with conn.cursor() as cur:
             cur.execute("DELETE FROM subscribers WHERE email = %s", (email,))
             removed = cur.rowcount > 0
@@ -180,7 +191,7 @@ def remove_subscriber(email: str) -> bool:
 
 def get_subscribers() -> List[str]:
     """Return all subscribed email addresses."""
-    with _lock, _connect() as conn:
+    with _connect() as conn:
         with conn.cursor() as cur:
             cur.execute("SELECT email FROM subscribers ORDER BY subscribed_at")
             return [row[0] for row in cur.fetchall()]

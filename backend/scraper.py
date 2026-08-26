@@ -239,6 +239,7 @@ def fetch_all_ipos(page: int = 1) -> List[Dict[str, Any]]:
         return []
 
     rows = payload.get("reportTableData", [])
+    #print(rows)
     result = []
 
     for row in rows:
