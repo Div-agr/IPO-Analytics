@@ -1,0 +1,11 @@
+node_modules/
+.env
+pyenv.cfg
+Lib\site-packages
+venv/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
