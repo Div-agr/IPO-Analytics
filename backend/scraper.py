@@ -311,13 +311,6 @@ def _merge_manual_overrides(scraped: List[Dict[str, Any]]) -> List[Dict[str, Any
 # ── Cached public interface ────────────────────────────────────────────────────
 
 def get_ipo_data(force_refresh: bool = False) -> List[Dict[str, Any]]:
-    """
-    Return cached IPO list (merged with manual overrides). Re-fetches from
-    investorgain if the freshness marker has expired (older than
-    CACHE_TTL seconds) or if force_refresh=True. If ranked data is
-    available (set by update_ranked_ipos), that's returned in preference
-    to raw scraped data.
-    """
     stale = force_refresh or _redis.get(_FRESH_KEY) is None
 
     if stale:
@@ -330,14 +323,19 @@ def get_ipo_data(force_refresh: bool = False) -> List[Dict[str, Any]]:
                 for ipo in fresh:
                     if ipo["IPO"] in ranked_map:
                         ipo["Apply_Probability"] = ranked_map[ipo["IPO"]]
-
-            _cache_set(_DATA_KEY, fresh)          # no TTL — kept as last-known-good
+            _cache_set(_DATA_KEY, fresh)
             _redis.set(_FRESH_KEY, "1", ex=CACHE_TTL)
         else:
             logger.warning("Fetch failed — falling back to last cached data, if any.")
 
+    base = _cache_get(_DATA_KEY) or []
     ranked = _cache_get(_RANKED_KEY)
-    base = ranked if ranked else (_cache_get(_DATA_KEY) or [])
+    if ranked:
+        ranked_map = {r["IPO"]: r.get("Apply_Probability", 0.0) for r in ranked}
+        for ipo in base:
+            if ipo["IPO"] in ranked_map:
+                ipo["Apply_Probability"] = ranked_map[ipo["IPO"]]
+
     return _merge_manual_overrides(base)
 
 
