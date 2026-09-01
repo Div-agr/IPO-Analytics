@@ -1,4 +1,5 @@
 import os
+import socket
 import pickle
 import pandas as pd
 from flask import Flask, request, jsonify
@@ -7,11 +8,11 @@ from flask_cors import CORS
 from datetime import datetime
 from dotenv import load_dotenv
 
-import scraper  # ← live data from investorgain.com, cached in Upstash Redis
-import store    # ← Postgres-backed (Neon) notification dedup + manual overrides
+import scraper
+import store  # ← Postgres-backed (Neon) notification dedup + manual overrides
 
 load_dotenv()
-
+socket.setdefaulttimeout(15) 
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
